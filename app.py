@@ -84,16 +84,7 @@ async def index(request: Request):
 # Route to trigger the model training process
 @app.get("/train")
 async def trainRouteClient():
-    """
-    Endpoint to initiate the model training pipeline.
-    """
-    try:
-        train_pipeline = TrainPipeline()
-        train_pipeline.run_pipeline()
-        return Response("Training successful!!!")
-
-    except Exception as e:
-        return Response(f"Error Occurred! {e}")
+    return Response("Training is disabled in deployed version")
 
 # Route to handle form submission and make predictions
 @app.post("/")
