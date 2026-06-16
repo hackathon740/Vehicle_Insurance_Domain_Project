@@ -1,4 +1,5 @@
-from src.cloud_storage.aws_storage import SimpleStorageService
+import os
+import dill
 from src.exception import MyException
 from src.entity.estimator import MyModel
 import sys
@@ -16,25 +17,36 @@ class Proj1Estimator:
         :param model_path: Location of your model in bucket
         """
         self.bucket_name = bucket_name
-        self.s3 = SimpleStorageService()
         self.model_path = model_path
         self.loaded_model:MyModel=None
 
 
     def is_model_present(self,model_path):
-        try:
-            return self.s3.s3_key_path_available(bucket_name=self.bucket_name, s3_key=model_path)
-        except MyException as e:
-            print(e)
-            return False
+        return os.path.exists(model_path)
 
     def load_model(self,)->MyModel:
         """
         Load the model from the model_path
         :return:
         """
+        try:
+            model_path = os.path.join(
+                "artifact",
+                "03_07_2026_23_21_33",
+                "model_trainer",
+                "trained_model",
+                "model.pkl"
+            )
 
-        return self.s3.load_model(self.model_path,bucket_name=self.bucket_name)
+            with open(model_path, "rb") as file:
+                model = dill.load(file)
+
+            return model
+
+        except Exception as e:
+            raise MyException(e, sys)
+
+        ## return self.s3.load_model(self.model_path,bucket_name=self.bucket_name)
 
     def save_model(self,from_file,remove:bool=False)->None:
         """
@@ -43,14 +55,7 @@ class Proj1Estimator:
         :param remove: By default it is false that mean you will have your model locally available in your system folder
         :return:
         """
-        try:
-            self.s3.upload_file(from_file,
-                                to_filename=self.model_path,
-                                bucket_name=self.bucket_name,
-                                remove=remove
-                                )
-        except Exception as e:
-            raise MyException(e, sys)
+        pass
 
 
     def predict(self,dataframe:DataFrame):
